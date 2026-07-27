@@ -1,0 +1,18 @@
+# Byte-compiled Emacs Lisp
+*.elc
+
+# Emacs backup/autosave files
+*~
+\#*\#
+.#*
+
+# Directory-local variables (machine/user specific)
+.dir-locals.el
+
+# Package manager artifacts (if generated locally)
+elpa/
+
+# macOS
+.DS_Store
+
+.idea/
