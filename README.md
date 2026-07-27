@@ -4,8 +4,11 @@ An Emacs **major mode** that displays your installed `package.el` packages in a 
 
 ## Features
 
-- Lists all packages installed via `package.el` with their **name**, **version**, **summary**, and **install directory**
+- Lists all packages installed via `package.el` with their **name**, **version**, **source**, **summary**, and **install directory**
+- **Source column** classifies each package as `configured`, `dependency`, `manual`, or `unknown`
 - Sortable columns — click a column header or use `tabulated-list-mode` keybindings to sort
+- Auto-detects your config file from `user-init-file` and follows `org-babel-load-file`, `load`, and `load-file` includes
+- Supports both `.org` (literate) and `.el` config files
 - Read-only buffer that respects your display rules (`pop-to-buffer`)
 
 ## Requirements
@@ -58,10 +61,11 @@ M-x trustrail-list-packages
 
 This opens the `*TrustRail Packages*` buffer showing a table like:
 
-| Package       | Version | Summary                          | Directory                          |
-|---------------|---------|----------------------------------|------------------------------------|
-| magit         | 3.3.0   | A Git porcelain inside Emacs     | ~/.emacs.d/elpa/magit-3.3.0/      |
-| use-package   | 2.4.5   | A configuration macro for …      | ~/.emacs.d/elpa/use-package-2.4.5/ |
+| Package       | Version | Source     | Summary                          | Directory                          |
+|---------------|---------|------------|----------------------------------|------------------------------------|
+| magit         | 3.3.0   | configured | A Git porcelain inside Emacs     | ~/.emacs.d/elpa/magit-3.3.0/      |
+| dash          | 2.19.1  | dependency | A modern list library            | ~/.emacs.d/elpa/dash-2.19.1/      |
+| use-package   | 2.4.5   | manual     | A configuration macro for …      | ~/.emacs.d/elpa/use-package-2.4.5/ |
 
 Standard `tabulated-list-mode` keys apply (e.g., `S` to sort by column, `q` to quit).
 
@@ -71,6 +75,31 @@ All symbols live under the `trustrail` customization group:
 
 ```
 M-x customize-group RET trustrail RET
+```
+
+### Source column
+
+Each package is classified as:
+
+| Source       | Meaning |
+|--------------|---------|
+| `configured` | Declared via `use-package` or `require` in your config file |
+| `dependency` | Pulled in as a requirement of another installed package |
+| `manual`     | Installed in `package-user-dir` but not in config or a dependency |
+| `unknown`    | Source could not be determined |
+
+### Config file detection
+
+By default, trustrail reads `user-init-file` (e.g. `~/.emacs.d/init.el`) and
+follows `org-babel-load-file`, `load`, and `load-file` calls to discover the
+real config files. Both `.org` (literate) and `.el` formats are supported.
+
+To override auto-detection, set `trustrail-user-config-files`:
+
+```elisp
+(setq trustrail-user-config-files
+      '("~/.emacs.d/config.org"
+        "~/.emacs.d/extra.el"))
 ```
 
 ## Development
