@@ -37,7 +37,17 @@ Emacs 30 ships =use-package= with =:vc= support — no extra package manager nee
 
 #+begin_src emacs-lisp
 (use-package trustrail
-  :vc (:url "https://github.com/systemhalted/trustrail.el" :branch "main")
+  :vc (:url "https://github.com/systemhalted/trustrail.el"
+       :rev "v0.1.0")
+  :commands trustrail-list-packages)
+#+end_src
+
+To track the latest on =main= instead of a pinned release:
+
+#+begin_src emacs-lisp
+(use-package trustrail
+  :vc (:url "https://github.com/systemhalted/trustrail.el"
+       :branch "main")
   :commands trustrail-list-packages)
 #+end_src
 
