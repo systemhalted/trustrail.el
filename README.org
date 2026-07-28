@@ -8,11 +8,12 @@ installed =package.el= packages in a sortable, read-only table buffer.
 
 * Features
 
-- Lists all packages installed via =package.el= with their *name*, *version*, *source*, *archive*, *maintainer*, *summary*, *URL*, and *install directory*
+- Lists all packages installed via =package.el= with their *name*, *version*, *source*, *archive*, *maintainer*, *summary*, and *URL*
 - *Source column* classifies each package as =configured=, =dependency=, =manual=, or =unknown=
 - *Archive* and *Maintainer* columns show package provenance
+- Falls back to reading =.el= file headers for =package-vc= installed packages (which lack full metadata in their descriptors)
+- In-buffer filtering by name, source, archive, or summary (=/= key)
 - Sortable columns — click a column header or use =tabulated-list-mode= keybindings to sort
-- In-buffer filtering by name or summary substring
 - Auto-detects your config file from =user-init-file= and follows =org-babel-load-file=, =load=, and =load-file= includes
 - Supports both =.org= (literate) and =.el= config files
 - Read-only buffer that respects your display rules (=pop-to-buffer=)
@@ -78,25 +79,28 @@ M-x trustrail-list-packages
 
 This opens the =*TrustRail Packages*= buffer showing a table like:
 
-| Package     | Version | Source     | Archive | Maintainer    | Summary                      | URL                                   | Directory                          |
-|-------------+---------+------------+---------+---------------+------------------------------+---------------------------------------+------------------------------------|
-| magit       | 3.3.0   | configured | melpa   | Jonas Bernoulli | A Git porcelain inside Emacs | https://github.com/magit/magit       | ~/.emacs.d/elpa/magit-3.3.0/      |
-| dash        | 2.19.1  | dependency | gnu     | Magnar Sveen  | A modern list library        | https://github.com/magnars/dash.el   | ~/.emacs.d/elpa/dash-2.19.1/      |
+| Package     | Version | Source     | Archive | Maintainer     | Summary                      | URL                                 |
+|-------------+---------+------------+---------+----------------+------------------------------+-------------------------------------|
+| magit       | 3.3.0   | configured | nongnu  | Jonas Bernoulli | A Git porcelain inside Emacs | https://github.com/magit/magit     |
+| dash        | 2.19.1  | dependency | gnu     | Basil Contov.  | A modern list library        | https://github.com/magnars/dash.el |
+| sdkman      | 0.2.0   | configured |         | Palak Mathur   | SDKMAN project environments  | https://github.com/systemhalted/sdkman.el |
 
 ** Keybindings
 
 Standard =tabulated-list-mode= keys apply, plus:
 
-| Key   | Command                       | Action                              |
-|-------+-------------------------------+-------------------------------------|
-| =g=   | =trustrail-refresh=           | Rebuild the package list            |
-| =/=   | =trustrail-filter=            | Filter by name or summary substring |
-| =C=   | =trustrail-filter-clear=      | Clear the active filter             |
-| =RET= | =trustrail-describe-package=  | Describe the package at point       |
-| =d=   | =trustrail-open-directory=    | Open install directory in Dired     |
-| =h=   | =trustrail-visit-homepage=    | Open package homepage in browser    |
-| =S=   | /(built-in)/                  | Sort by column                      |
-| =q=   | /(built-in)/                  | Quit the buffer                     |
+| Key   | Command                       | Action                                      |
+|-------+-------------------------------+---------------------------------------------|
+| =g=   | =trustrail-refresh=           | Rebuild the package list                    |
+| =/=   | =trustrail-filter=            | Filter by name, source, archive, or summary |
+| =C=   | =trustrail-filter-clear=      | Clear the active filter                     |
+| =RET= | =trustrail-describe-package=  | Describe the package at point               |
+| =d=   | =trustrail-open-directory=    | Open install directory in Dired             |
+| =h=   | =trustrail-visit-homepage=    | Open package homepage in browser            |
+| =>=   | =scroll-left=                 | Scroll right                                |
+| =<=   | =scroll-right=                | Scroll left                                 |
+| =S=   | /(built-in)/                  | Sort by column                              |
+| =q=   | /(built-in)/                  | Quit the buffer                             |
 
 * Customization
 
