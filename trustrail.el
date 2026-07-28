@@ -372,8 +372,7 @@ CONFIG-SET and DEP-SET are hash-tables for source classification."
  (let ((name (trustrail--current-package-name)))
    (if name
        (let* ((desc (cadr (assq (intern name) package-alist)))
-              (extras (and desc (package-desc-extras desc)))
-              (url (cdr (assq :url extras))))
+              (url (trustrail--package-url desc)))
          (if (and url (not (string-empty-p url)))
              (browse-url url)
            (user-error "No homepage URL for %s" name)))
