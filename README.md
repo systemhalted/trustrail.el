@@ -67,7 +67,18 @@ This opens the `*TrustRail Packages*` buffer showing a table like:
 | dash          | 2.19.1  | dependency | A modern list library            | ~/.emacs.d/elpa/dash-2.19.1/      |
 | use-package   | 2.4.5   | manual     | A configuration macro for …      | ~/.emacs.d/elpa/use-package-2.4.5/ |
 
-Standard `tabulated-list-mode` keys apply (e.g., `S` to sort by column, `q` to quit).
+Standard `tabulated-list-mode` keys apply, plus:
+
+| Key   | Command                     | Action                              |
+|-------|-----------------------------|-------------------------------------|
+| `g`   | `trustrail-refresh`         | Rebuild the package list            |
+| `/`   | `trustrail-filter`          | Filter by name or summary substring |
+| `C`   | `trustrail-filter-clear`    | Clear the active filter             |
+| `RET` | `trustrail-describe-package`| Describe the package at point       |
+| `d`   | `trustrail-open-directory`  | Open install directory in Dired     |
+| `h`   | `trustrail-visit-homepage`  | Open package homepage in browser    |
+| `S`   | *(built-in)*                | Sort by column                      |
+| `q`   | *(built-in)*                | Quit the buffer                     |
 
 ## Customization
 

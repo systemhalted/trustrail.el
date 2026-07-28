@@ -204,7 +204,9 @@ CONFIG-SET and DEP-SET are hash-tables for source classification."
 
 ;;;###autoload
 (define-derived-mode trustrail-package-list-mode tabulated-list-mode "TrustRail Packages"
- "Major mode for listing installed Emacs packages."
+ "Major mode for listing installed Emacs packages.
+
+\\{trustrail-package-list-mode-map}"
  (setq tabulated-list-format
        [("Package" 28 t)
         ("Version" 18 t)
@@ -213,7 +215,102 @@ CONFIG-SET and DEP-SET are hash-tables for source classification."
         ("Directory" 80 t)])
  (setq tabulated-list-padding 2)
  (setq tabulated-list-sort-key (cons "Package" nil))
+ (setq-local trustrail--filter-string nil)
+ (setq-local trustrail--all-entries nil)
  (tabulated-list-init-header))
+
+(defvar-local trustrail--filter-string nil
+ "Current filter substring applied to the package list.")
+
+(defvar-local trustrail--all-entries nil
+ "Unfiltered list of all tabulated entries.")
+
+(defun trustrail--apply-filter ()
+ "Apply `trustrail--filter-string' to narrow visible entries."
+ (setq tabulated-list-entries
+       (if (or (null trustrail--filter-string)
+               (string-empty-p trustrail--filter-string))
+           trustrail--all-entries
+         (let ((pattern (downcase trustrail--filter-string)))
+           (seq-filter
+            (lambda (entry)
+              (let ((vec (cadr entry)))
+                (or (string-match-p pattern (downcase (aref vec 0)))
+                    (string-match-p pattern (downcase (aref vec 3))))))
+            trustrail--all-entries))))
+ (tabulated-list-print t))
+
+(defun trustrail-refresh ()
+ "Rebuild the package list from scratch."
+ (interactive)
+ (let* ((config-set (trustrail--configured-packages))
+        (dep-set (trustrail--dependency-set))
+        (entries (mapcar (lambda (pkg)
+                           (trustrail--tabulated-entry pkg config-set dep-set))
+                         (trustrail--installed-packages))))
+   (setq trustrail--all-entries entries)
+   (trustrail--apply-filter)
+   (message "TrustRail: %d packages" (length trustrail--all-entries))))
+
+(defun trustrail-filter (pattern)
+ "Filter the package list by PATTERN (matches name or summary)."
+ (interactive "sFilter (name/summary): ")
+ (setq trustrail--filter-string pattern)
+ (trustrail--apply-filter)
+ (message "TrustRail: showing %d/%d packages"
+          (length tabulated-list-entries)
+          (length trustrail--all-entries)))
+
+(defun trustrail-filter-clear ()
+ "Clear the active filter and show all packages."
+ (interactive)
+ (setq trustrail--filter-string nil)
+ (trustrail--apply-filter)
+ (message "TrustRail: filter cleared"))
+
+(defun trustrail--current-package-name ()
+ "Return the package name on the current line."
+ (let ((entry (tabulated-list-get-entry)))
+   (when entry (aref entry 0))))
+
+(defun trustrail-describe-package ()
+ "Describe the package on the current line."
+ (interactive)
+ (let ((name (trustrail--current-package-name)))
+   (if name
+       (describe-package (intern name))
+     (user-error "No package on this line"))))
+
+(defun trustrail-open-directory ()
+ "Open the install directory of the package on the current line."
+ (interactive)
+ (let ((entry (tabulated-list-get-entry)))
+   (if entry
+       (let ((dir (aref entry 4)))
+         (if (and dir (not (string-empty-p dir)) (file-directory-p dir))
+             (dired dir)
+           (user-error "No valid directory for this package")))
+     (user-error "No package on this line"))))
+
+(defun trustrail-visit-homepage ()
+ "Open the homepage of the package on the current line."
+ (interactive)
+ (let ((name (trustrail--current-package-name)))
+   (if name
+       (let* ((desc (cadr (assq (intern name) package-alist)))
+              (extras (and desc (package-desc-extras desc)))
+              (url (cdr (assq :url extras))))
+         (if (and url (not (string-empty-p url)))
+             (browse-url url)
+           (user-error "No homepage URL for %s" name)))
+     (user-error "No package on this line"))))
+
+(define-key trustrail-package-list-mode-map (kbd "g") #'trustrail-refresh)
+(define-key trustrail-package-list-mode-map (kbd "/") #'trustrail-filter)
+(define-key trustrail-package-list-mode-map (kbd "C") #'trustrail-filter-clear)
+(define-key trustrail-package-list-mode-map (kbd "RET") #'trustrail-describe-package)
+(define-key trustrail-package-list-mode-map (kbd "d") #'trustrail-open-directory)
+(define-key trustrail-package-list-mode-map (kbd "h") #'trustrail-visit-homepage)
 
 ;;;###autoload
 (defun trustrail-list-packages ()
@@ -221,14 +318,14 @@ CONFIG-SET and DEP-SET are hash-tables for source classification."
  (interactive)
  (let* ((buffer (get-buffer-create trustrail-buffer-name))
         (config-set (trustrail--configured-packages))
-        (dep-set (trustrail--dependency-set)))
+        (dep-set (trustrail--dependency-set))
+        (entries (mapcar (lambda (pkg)
+                           (trustrail--tabulated-entry pkg config-set dep-set))
+                         (trustrail--installed-packages))))
    (with-current-buffer buffer
      (trustrail-package-list-mode)
-     (setq tabulated-list-entries
-           (mapcar (lambda (pkg)
-                     (trustrail--tabulated-entry pkg config-set dep-set))
-                   (trustrail--installed-packages)))
-     (tabulated-list-print t))
+     (setq trustrail--all-entries entries)
+     (trustrail--apply-filter))
    (pop-to-buffer buffer)))
 
 (provide 'trustrail)
