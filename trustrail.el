@@ -52,8 +52,19 @@ When nil, auto-detect from `user-init-file' and follow includes."
 
 (defun trustrail--package-summary (desc)
  "Return package summary from package DESC."
- (or (and desc (package-desc-summary desc))
-     ""))
+ (let ((summary (and desc (package-desc-summary desc))))
+   (if (and summary (not (string= summary "No description available.")))
+       summary
+     (or (trustrail--read-file-summary desc) ""))))
+
+(defun trustrail--read-file-summary (desc)
+ "Read the summary line from the main .el file of package DESC."
+ (when-let ((file (trustrail--main-el-file desc)))
+   (with-temp-buffer
+     (insert-file-contents file nil 0 512)
+     (goto-char (point-min))
+     (when (re-search-forward "^;;; [^ ]+ --- \\(.+?\\)\\(?:[ \t]+-\\*-\\|$\\)" nil t)
+       (string-trim (match-string 1))))))
 
 (defun trustrail--package-dir (desc)
  "Return installed package directory from package DESC."
@@ -74,24 +85,46 @@ descriptors do not retain the archive field."
 
 (defun trustrail--package-maintainer (desc)
  "Return the maintainer string from package DESC."
- (let ((extras (and desc (package-desc-extras desc))))
-   (if extras
-       (let ((maint (cdr (assq :maintainer extras))))
-         (cond
-          ((null maint) "")
-          ((stringp maint) maint)
-          ((and (consp maint) (stringp (car maint)) (stringp (cdr maint)))
-           (format "%s <%s>" (car maint) (cdr maint)))
-          ((and (consp maint) (stringp (car maint)))
-           (car maint))
-          (t (format "%s" maint))))
-     "")))
+ (let* ((extras (and desc (package-desc-extras desc)))
+        (maint (and extras (cdr (assq :maintainer extras)))))
+   (cond
+    ((null maint)
+     (or (trustrail--read-file-header desc "Maintainer") ""))
+    ((stringp maint) maint)
+    ((and (consp maint) (stringp (car maint)) (stringp (cdr maint)))
+     (format "%s <%s>" (car maint) (cdr maint)))
+    ((and (consp maint) (stringp (car maint)))
+     (car maint))
+    (t (format "%s" maint)))))
 
 (defun trustrail--package-url (desc)
  "Return the homepage URL from package DESC."
  (let ((extras (and desc (package-desc-extras desc))))
    (or (and extras (cdr (assq :url extras)))
+       (trustrail--read-file-header desc "URL")
        "")))
+
+;; --- Fallback header reader for vc-installed packages ---
+
+(defun trustrail--main-el-file (desc)
+ "Return the main .el file path for package DESC, or nil."
+ (when desc
+   (let* ((dir (package-desc-dir desc))
+          (name (symbol-name (package-desc-name desc))))
+     (when dir
+       (let ((file (expand-file-name (concat name ".el") dir)))
+         (when (file-readable-p file) file))))))
+
+(defun trustrail--read-file-header (desc header)
+ "Read HEADER value from the main .el file of package DESC."
+ (when-let ((file (trustrail--main-el-file desc)))
+   (with-temp-buffer
+     (insert-file-contents file nil 0 2048)
+     (goto-char (point-min))
+     (when (re-search-forward
+            (format "^;; %s:[ \t]+\\(.+\\)" (regexp-quote header))
+            nil t)
+       (string-trim (match-string 1))))))
 
 ;; --- Config file parser ---
 
