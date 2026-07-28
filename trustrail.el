@@ -61,6 +61,29 @@ When nil, auto-detect from `user-init-file' and follow includes."
           (package-desc-dir desc))
      ""))
 
+(defun trustrail--package-archive (desc)
+ "Return the archive name from package DESC."
+ (or (and desc (package-desc-archive desc))
+     ""))
+
+(defun trustrail--package-maintainer (desc)
+ "Return the maintainer string from package DESC."
+ (let ((extras (and desc (package-desc-extras desc))))
+   (if extras
+       (let ((maint (cdr (assq :maintainer extras))))
+         (cond
+          ((null maint) "")
+          ((stringp maint) maint)
+          ((consp maint) (or (car maint) ""))
+          (t "")))
+     "")))
+
+(defun trustrail--package-url (desc)
+ "Return the homepage URL from package DESC."
+ (let ((extras (and desc (package-desc-extras desc))))
+   (or (and extras (cdr (assq :url extras)))
+       "")))
+
 ;; --- Config file parser ---
 
 (defun trustrail--extract-org-elisp (text)
@@ -198,9 +221,12 @@ CONFIG-SET and DEP-SET are hash-tables for source classification."
         (version (trustrail--package-version desc))
         (summary (trustrail--package-summary desc))
         (dir (trustrail--package-dir desc))
-        (source (trustrail--package-source name config-set dep-set desc)))
+        (source (trustrail--package-source name config-set dep-set desc))
+        (archive (trustrail--package-archive desc))
+        (maintainer (trustrail--package-maintainer desc))
+        (url (trustrail--package-url desc)))
    (list name
-         (vector name version source summary dir))))
+         (vector name version source archive maintainer summary url dir))))
 
 ;;;###autoload
 (define-derived-mode trustrail-package-list-mode tabulated-list-mode "TrustRail Packages"
@@ -209,10 +235,13 @@ CONFIG-SET and DEP-SET are hash-tables for source classification."
 \\{trustrail-package-list-mode-map}"
  (setq tabulated-list-format
        [("Package" 28 t)
-        ("Version" 18 t)
+        ("Version" 14 t)
         ("Source" 12 t)
-        ("Summary" 60 t)
-        ("Directory" 80 t)])
+        ("Archive" 12 t)
+        ("Maintainer" 24 t)
+        ("Summary" 48 t)
+        ("URL" 40 t)
+        ("Directory" 60 t)])
  (setq tabulated-list-padding 2)
  (setq tabulated-list-sort-key (cons "Package" nil))
  (setq-local trustrail--filter-string nil)
@@ -236,7 +265,7 @@ CONFIG-SET and DEP-SET are hash-tables for source classification."
             (lambda (entry)
               (let ((vec (cadr entry)))
                 (or (string-match-p pattern (downcase (aref vec 0)))
-                    (string-match-p pattern (downcase (aref vec 3))))))
+                    (string-match-p pattern (downcase (aref vec 5))))))
             trustrail--all-entries))))
  (tabulated-list-print t))
 
@@ -286,7 +315,7 @@ CONFIG-SET and DEP-SET are hash-tables for source classification."
  (interactive)
  (let ((entry (tabulated-list-get-entry)))
    (if entry
-       (let ((dir (aref entry 4)))
+       (let ((dir (aref entry 7)))
          (if (and dir (not (string-empty-p dir)) (file-directory-p dir))
              (dired dir)
            (user-error "No valid directory for this package")))

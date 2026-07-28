@@ -4,6 +4,12 @@
 All notable changes to this project are documented in this file.
 Format follows [[https://keepachangelog.com][Keep a Changelog]].
 
+* Unreleased
+
+** Added
+- New columns: Archive, Maintainer, URL
+- Accessor helpers: =trustrail--package-archive=, =trustrail--package-maintainer=, =trustrail--package-url=
+
 * v0.1.0 — 2026-07-28
 
 ** Added

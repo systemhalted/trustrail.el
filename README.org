@@ -8,8 +8,9 @@ installed =package.el= packages in a sortable, read-only table buffer.
 
 * Features
 
-- Lists all packages installed via =package.el= with their *name*, *version*, *source*, *summary*, and *install directory*
+- Lists all packages installed via =package.el= with their *name*, *version*, *source*, *archive*, *maintainer*, *summary*, *URL*, and *install directory*
 - *Source column* classifies each package as =configured=, =dependency=, =manual=, or =unknown=
+- *Archive* and *Maintainer* columns show package provenance
 - Sortable columns — click a column header or use =tabulated-list-mode= keybindings to sort
 - In-buffer filtering by name or summary substring
 - Auto-detects your config file from =user-init-file= and follows =org-babel-load-file=, =load=, and =load-file= includes
@@ -77,11 +78,10 @@ M-x trustrail-list-packages
 
 This opens the =*TrustRail Packages*= buffer showing a table like:
 
-| Package     | Version | Source     | Summary                      | Directory                          |
-|-------------+---------+------------+------------------------------+------------------------------------|
-| magit       | 3.3.0   | configured | A Git porcelain inside Emacs | ~/.emacs.d/elpa/magit-3.3.0/      |
-| dash        | 2.19.1  | dependency | A modern list library        | ~/.emacs.d/elpa/dash-2.19.1/      |
-| use-package | 2.4.5   | manual     | A configuration macro for …  | ~/.emacs.d/elpa/use-package-2.4.5/ |
+| Package     | Version | Source     | Archive | Maintainer    | Summary                      | URL                                   | Directory                          |
+|-------------+---------+------------+---------+---------------+------------------------------+---------------------------------------+------------------------------------|
+| magit       | 3.3.0   | configured | melpa   | Jonas Bernoulli | A Git porcelain inside Emacs | https://github.com/magit/magit       | ~/.emacs.d/elpa/magit-3.3.0/      |
+| dash        | 2.19.1  | dependency | gnu     | Magnar Sveen  | A modern list library        | https://github.com/magnars/dash.el   | ~/.emacs.d/elpa/dash-2.19.1/      |
 
 ** Keybindings
 
