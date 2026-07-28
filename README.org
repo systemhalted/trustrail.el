@@ -3,8 +3,7 @@
 #+language: en
 #+options: num:nil toc:t
 
-An Emacs *major mode* (derived from =tabulated-list-mode=) that displays your
-installed =package.el= packages in a sortable, read-only table buffer.
+An Emacs *major mode* that displays your installed =package.el= packages in a sortable, read-only table buffer.
 
 * Features
 
