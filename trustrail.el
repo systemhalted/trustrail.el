@@ -250,14 +250,8 @@ CONFIG-SET and DEP-SET are hash-tables for source classification."
  (setq-local trustrail--filter-string nil)
  (setq-local trustrail--all-entries nil)
  (setq truncate-lines t)
- (add-hook 'post-command-hook #'trustrail--sync-header-hscroll nil t)
+ (put 'scroll-left 'disabled nil)
  (tabulated-list-init-header))
-
-(defun trustrail--sync-header-hscroll ()
- "Force header-line to stay in sync with horizontal scroll position."
- (let ((hscroll (window-hscroll)))
-   (set-window-parameter nil 'header-line-hscroll hscroll)
-   (force-window-update (selected-window))))
 
 (defvar-local trustrail--filter-string nil
  "Current filter substring applied to the package list.")
@@ -351,6 +345,8 @@ CONFIG-SET and DEP-SET are hash-tables for source classification."
 (define-key trustrail-package-list-mode-map (kbd "RET") #'trustrail-describe-package)
 (define-key trustrail-package-list-mode-map (kbd "d") #'trustrail-open-directory)
 (define-key trustrail-package-list-mode-map (kbd "h") #'trustrail-visit-homepage)
+(define-key trustrail-package-list-mode-map (kbd "<") #'scroll-right)
+(define-key trustrail-package-list-mode-map (kbd ">") #'scroll-left)
 
 ;;;###autoload
 (defun trustrail-list-packages ()
