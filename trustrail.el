@@ -62,9 +62,14 @@ When nil, auto-detect from `user-init-file' and follow includes."
      ""))
 
 (defun trustrail--package-archive (desc)
- "Return the archive name from package DESC."
- (or (and desc (package-desc-archive desc))
-     ""))
+ "Return the archive name from package DESC.
+Looks up the archive from `package-archive-contents' since installed
+descriptors do not retain the archive field."
+ (if desc
+     (let* ((name (package-desc-name desc))
+            (remote (cadr (assq name package-archive-contents))))
+       (or (and remote (package-desc-archive remote)) ""))
+   ""))
 
 (defun trustrail--package-maintainer (desc)
  "Return the maintainer string from package DESC."
@@ -268,6 +273,8 @@ CONFIG-SET and DEP-SET are hash-tables for source classification."
             (lambda (entry)
               (let ((vec (cadr entry)))
                 (or (string-match-p pattern (downcase (aref vec 0)))
+                    (string-match-p pattern (downcase (aref vec 2)))
+                    (string-match-p pattern (downcase (aref vec 3)))
                     (string-match-p pattern (downcase (aref vec 5))))))
             trustrail--all-entries))))
  (tabulated-list-print t))
