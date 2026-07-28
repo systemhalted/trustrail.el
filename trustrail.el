@@ -223,13 +223,12 @@ CONFIG-SET and DEP-SET are hash-tables for source classification."
         (desc (trustrail--package-desc pkg))
         (version (trustrail--package-version desc))
         (summary (trustrail--package-summary desc))
-        (dir (trustrail--package-dir desc))
         (source (trustrail--package-source name config-set dep-set desc))
         (archive (trustrail--package-archive desc))
         (maintainer (trustrail--package-maintainer desc))
         (url (trustrail--package-url desc)))
    (list name
-         (vector name version source archive maintainer summary url dir))))
+         (vector name version source archive maintainer summary url))))
 
 ;;;###autoload
 (define-derived-mode trustrail-package-list-mode tabulated-list-mode "TrustRail Packages"
@@ -237,14 +236,13 @@ CONFIG-SET and DEP-SET are hash-tables for source classification."
 
 \\{trustrail-package-list-mode-map}"
  (setq tabulated-list-format
-       [("Package" 28 t)
+       [("Package" 24 t)
         ("Version" 14 t)
         ("Source" 12 t)
-        ("Archive" 12 t)
-        ("Maintainer" 24 t)
-        ("Summary" 48 t)
-        ("URL" 40 t)
-        ("Directory" 60 t)])
+        ("Archive" 10 t)
+        ("Maintainer" 20 t)
+        ("Summary" 44 t)
+        ("URL" 40 t)])
  (setq tabulated-list-padding 2)
  (setq tabulated-list-sort-key (cons "Package" nil))
  (setq-local trustrail--filter-string nil)
@@ -318,12 +316,13 @@ CONFIG-SET and DEP-SET are hash-tables for source classification."
 (defun trustrail-open-directory ()
  "Open the install directory of the package on the current line."
  (interactive)
- (let ((entry (tabulated-list-get-entry)))
-   (if entry
-       (let ((dir (aref entry 7)))
-         (if (and dir (not (string-empty-p dir)) (file-directory-p dir))
-             (dired dir)
-           (user-error "No valid directory for this package")))
+ (let ((name (trustrail--current-package-name)))
+   (if name
+       (let* ((desc (cadr (assq (intern name) package-alist)))
+              (dir (and desc (package-desc-dir desc))))
+         (if (and dir (file-directory-p (format "%s" dir)))
+             (dired (format "%s" dir))
+           (user-error "No valid directory for %s" name)))
      (user-error "No package on this line"))))
 
 (defun trustrail-visit-homepage ()
