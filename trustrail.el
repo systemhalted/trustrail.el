@@ -249,7 +249,15 @@ CONFIG-SET and DEP-SET are hash-tables for source classification."
  (setq tabulated-list-sort-key (cons "Package" nil))
  (setq-local trustrail--filter-string nil)
  (setq-local trustrail--all-entries nil)
+ (setq truncate-lines t)
+ (add-hook 'post-command-hook #'trustrail--sync-header-hscroll nil t)
  (tabulated-list-init-header))
+
+(defun trustrail--sync-header-hscroll ()
+ "Force header-line to stay in sync with horizontal scroll position."
+ (let ((hscroll (window-hscroll)))
+   (set-window-parameter nil 'header-line-hscroll hscroll)
+   (force-window-update (selected-window))))
 
 (defvar-local trustrail--filter-string nil
  "Current filter substring applied to the package list.")
