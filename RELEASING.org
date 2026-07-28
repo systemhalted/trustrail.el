@@ -1,0 +1,66 @@
+#+title: Release Process
+#+author: Palak Mathur
+
+* Versioning
+
+This project uses [[https://semver.org][Semantic Versioning]]: =MAJOR.MINOR.PATCH=.
+
+- *MAJOR* — breaking changes to public API or behavior
+- *MINOR* — new features, backward-compatible
+- *PATCH* — bug fixes, backward-compatible
+
+* Cutting a Release
+
+1. Update the version in =trustrail.el= header:
+
+   #+begin_example
+   ;; Version: X.Y.Z
+   #+end_example
+
+2. Update =CHANGELOG.org= with a new entry for the version.
+
+3. Commit the version bump:
+
+   #+begin_src shell
+   git add trustrail.el CHANGELOG.org
+   git commit -m "Release vX.Y.Z"
+   #+end_src
+
+4. Tag the release:
+
+   #+begin_src shell
+   git tag -a vX.Y.Z -m "vX.Y.Z - <short description>"
+   #+end_src
+
+5. Push the commit and tag:
+
+   #+begin_src shell
+   git push && git push --tags
+   #+end_src
+
+6. (Optional) Create a GitHub release from the tag with release notes
+   copied from =CHANGELOG.org=.
+
+* Installing a Tagged Release
+
+Users can install a specific version via =:vc= (Emacs 30+):
+
+#+begin_src emacs-lisp
+(use-package trustrail
+  :vc (:url "https://github.com/systemhalted/trustrail.el"
+       :rev "v0.1.0"))
+#+end_src
+
+Or with =straight.el=:
+
+#+begin_src emacs-lisp
+(use-package trustrail
+  :straight (:host github :repo "systemhalted/trustrail.el"
+             :tag "v0.1.0"))
+#+end_src
+
+* Branch Strategy
+
+- =main= — stable, every commit should be releasable
+- Feature branches merged via PR when ready
+- Tags are immutable — never delete or force-push a tag

@@ -1,7 +1,7 @@
 ;;; trustrail.el --- List installed Emacs packages -*- lexical-binding: t; -*-
 
 ;; Author: Palak Mathur
-;; Version: 0.0.1
+;; Version: 0.1.0
 ;; Package-Requires: ((emacs "27.1"))
 ;; Keywords: tools, packages
 ;; URL: https://github.com/yourname/trustrail

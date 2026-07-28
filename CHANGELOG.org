@@ -1,0 +1,18 @@
+#+title: Changelog
+#+author: Palak Mathur
+
+All notable changes to this project are documented in this file.
+Format follows [[https://keepachangelog.com][Keep a Changelog]].
+
+* v0.1.0 — 2026-07-28
+
+** Added
+- Package listing from =package-alist= in a =tabulated-list-mode= buffer
+- Columns: Package, Version, Source, Summary, Directory
+- Source classification: =configured=, =dependency=, =manual=, =unknown=
+- Config file auto-detection from =user-init-file= with include-following
+- Support for =.org= (literate) and =.el= config files
+- =trustrail-user-config-files= defcustom for manual override
+- Refresh (=g=), filter (=/=), clear filter (=C=)
+- Describe package (=RET=), open directory (=d=), visit homepage (=h=)
+- GPL-3.0 license
