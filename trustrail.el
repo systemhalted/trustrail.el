@@ -74,8 +74,11 @@ When nil, auto-detect from `user-init-file' and follow includes."
          (cond
           ((null maint) "")
           ((stringp maint) maint)
-          ((consp maint) (or (car maint) ""))
-          (t "")))
+          ((and (consp maint) (stringp (car maint)) (stringp (cdr maint)))
+           (format "%s <%s>" (car maint) (cdr maint)))
+          ((and (consp maint) (stringp (car maint)))
+           (car maint))
+          (t (format "%s" maint))))
      "")))
 
 (defun trustrail--package-url (desc)
