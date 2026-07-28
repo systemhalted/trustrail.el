@@ -91,8 +91,18 @@ When nil, auto-detect from `user-init-file' and follow includes."
  "Scan elisp TEXT for file-loading forms and return referenced paths."
  (let ((paths nil)
        (start 0))
+   ;; Match string-literal paths: (load "path"), (load-file "path"),
+   ;; (org-babel-load-file "path")
    (while (string-match
            "(\\(?:org-babel-load-file\\|load-file\\|load\\)[ \t\n]+\"\\([^\"]+\\)\""
+           text start)
+     (push (match-string 1 text) paths)
+     (setq start (match-end 0)))
+   ;; Match expand-file-name with a string literal inside a load form:
+   ;; (load (expand-file-name "name.el" dir))
+   (setq start 0)
+   (while (string-match
+           "(expand-file-name[ \t\n]+\"\\([^\"]+\\)\""
            text start)
      (push (match-string 1 text) paths)
      (setq start (match-end 0)))
@@ -102,13 +112,17 @@ When nil, auto-detect from `user-init-file' and follow includes."
  "Resolve PATH relative to BASE-DIR, appending .el if needed."
  (let ((expanded (expand-file-name path base-dir)))
    (cond
-    ((file-exists-p expanded) expanded)
-    ((file-exists-p (concat expanded ".el")) (concat expanded ".el"))
+    ((and (file-regular-p expanded)
+          (string-match-p "\\.\\(?:el\\|org\\)\\'" expanded))
+     expanded)
+    ((file-regular-p (concat expanded ".el")) (concat expanded ".el"))
+    ((file-regular-p (concat expanded ".org")) (concat expanded ".org"))
     (t nil))))
 
 (defun trustrail--parse-config-file (file visited)
  "Parse FILE for package names, following includes.  VISITED tracks seen files."
- (when (and file (file-readable-p file) (not (gethash file visited)))
+ (when (and file (file-regular-p file) (file-readable-p file)
+            (not (gethash file visited)))
    (puthash file t visited)
    (let* ((text (with-temp-buffer
                   (insert-file-contents file)
